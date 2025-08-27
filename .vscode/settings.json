@@ -1,0 +1,7 @@
+{
+    "editor.quickSuggestionsDelay": 10,
+    "editor.suggest.selectionMode": "always",
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "javascript.suggest.enabled": false,
+    "typescript.suggest.enabled": false
+}
