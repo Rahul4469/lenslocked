@@ -1,8 +1,10 @@
-<h>FAQ Page</h>
+<h1>FAQ Page</h1>
 <ul>
-    <li><b>Is there a fee version</b> Yes! We offer free Trail for 30 days on any plai plans.</li>
-    <li><b>Is there a fee version</b> Yes! We offer free Trail for 30 days on any plai plans.</li>
-    <li><b>Is there a fee version</b> Yes! We offer free Trail for 30 days on any plai plans.</li>
-    <li><b>Is there a fee version</b> Yes! We offer free Trail for 30 days on any plai plans.</li>
-    <script> someFunc</script>
+    {{range .}}
+        {{template "qa" .}}
+    {{end}}
 </ul>
+
+{{define "qa"}}
+<li><b>{{.Question}}</b> {{.Answer}}</li>
+{{end}}
