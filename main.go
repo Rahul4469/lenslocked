@@ -12,13 +12,13 @@ import (
 
 func main() {
 	r := chi.NewRouter()
-	tpl, err := views.ParseFS(templates.FS, "home.gohtml")
+	tpl, err := views.ParseFS(templates.FS, "home.gohtml", "layout-parts.gohtml")
 	if err != nil {
 		panic(err)
 	}
 	r.Get("/", controllers.StaticHandler(tpl))
 
-	tpl, err = views.ParseFS(templates.FS, "contact.gohtml")
+	tpl, err = views.ParseFS(templates.FS, "contact.gohtml", "layout-parts.gohtml")
 	if err != nil {
 		panic(err)
 	}
