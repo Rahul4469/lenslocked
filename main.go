@@ -24,11 +24,12 @@ func main() {
 	}
 	r.Get("/contact", controllers.StaticHandler(tpl))
 
-	tpl, err = views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml")
+	userC := controllers.Users{}
+	userC.Templates.New, err = views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml")
 	if err != nil {
 		panic(err)
 	}
-	r.Get("/signup", controllers.StaticHandler(tpl))
+	r.Get("/signup", userC.New)
 
 	tpl, err = views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml")
 	if err != nil {

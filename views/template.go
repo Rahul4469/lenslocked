@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// Parse html template and save into tpl
 func ParseFS(fs fs.FS, patterns ...string) (Template, error) {
 	tpl, err := template.ParseFS(fs, patterns...)
 	if err != nil {
@@ -31,7 +32,8 @@ type Template struct {
 	htmlTpl *template.Template
 }
 
-// /helper func to reuse for templates
+// helper func to reuse for templates
+// Execute writes the tpl data as a response to the client
 func (t Template) Execute(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	err := t.htmlTpl.Execute(w, data)

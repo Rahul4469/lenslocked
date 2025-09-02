@@ -7,6 +7,7 @@ import (
 	"github.com/Rahul4469/lenslocked/views"
 )
 
+// Created to separate parse and Execute steps to router
 func StaticHandler(tpl views.Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tpl.Execute(w, nil)
