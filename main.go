@@ -30,6 +30,7 @@ func main() {
 		panic(err)
 	}
 	r.Get("/signup", userC.New)
+	r.Post("/users", userC.Create)
 
 	tpl, err = views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml")
 	if err != nil {
@@ -42,4 +43,6 @@ func main() {
 	})
 	fmt.Println("Starting server at port 3000...")
 	http.ListenAndServe(":3000", r)
+	//once starting the router, all these methods are registered on the router
+	//one receiving any request these methods are matched and the methods in the arguments gets executed for the response
 }

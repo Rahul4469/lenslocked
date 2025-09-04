@@ -8,7 +8,7 @@
 </head>
 <body>
     <header>
-       <nav class="bg-gray-800">
+       <nav class="bg-zinc-900">
            <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
                <div class="relative flex h-16 items-center justify-between">
                    <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -35,13 +35,14 @@
                        </button>
                    </div>
                    <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                       <div class="flex shrink-0 items-center text-4xl pr-8 dark:text-white font-mono">Brainrot
+                       <div class="flex shrink-0 items-center text-4xl pr-8 ">
+                           <a href="/" class="dark:text-white font-mono">Brainrot</a>
                            <!-- <img class="h-8 w-auto" src="brainrot_logo_1.jpg" alt="Brainrot"> -->
                        </div>
                        <div class="hidden sm:ml-6 sm:block">
                            <div class="flex space-x-4">
                                <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-                               <a href="/" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Home</a>
+                               <a href="/" class="rounded-md bg-zinc-700 px-3 py-2 text-sm font-medium text-white" aria-current="page">Home</a>
                                <a href="/contact" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Contact</a>
                                <a href="/faq" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">FAQ</a>
                                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Projects</a>
@@ -51,7 +52,7 @@
                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
 
                        <a href="/signup" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:text-white">Sign in</a>
-                       <a href="/signup" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Sign up</a>
+                       <a href="/signup" class="rounded-md bg-zinc-700 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Sign up</a>
 
                        <!-- Notifications menu -->
                        <!-- <button type="button" class="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
@@ -97,10 +98,10 @@
            <div class="sm:hidden" id="mobile-menu">
                <div class="space-y-1 px-2 pt-2 pb-3">
                    <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-                   <a href="#" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white" aria-current="page">Dashboard</a>
-                   <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Team</a>
+                   <a href="/" class="block rounded-md bg-zinc-700 px-3 py-2 text-base font-medium text-white" aria-current="page">Home</a>
+                   <a href="/contact" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Contact</a>
+                   <a href="/faq" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Faq</a>
                    <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Projects</a>
-                   <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Calendar</a>
                </div>
            </div>
        </nav>
@@ -110,7 +111,7 @@
 <!-- Each page's content goes here. -->
 
 {{define "footer"}}
-    <footer class="bg-gray-900">
+    <footer class="bg-radial-[at_25%_25%] from-zinc-900 to-zinc-700 to-75%">
         <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8 lg:py-32">
             <div class="mx-auto max-w-2xl text-center">
                 <h2 class="text-base/7 font-semibold text-indigo-400">Get started</h2>

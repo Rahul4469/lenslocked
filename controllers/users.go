@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -11,5 +12,14 @@ type Users struct {
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
-	u.Templates.New.Execute(w, nil)
+	var data struct {
+		Email string
+	}
+	data.Email = r.FormValue("email")
+	u.Templates.New.Execute(w, data)
+}
+
+func (u Users) Create(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Email: ", r.FormValue("email"))
+	fmt.Fprintln(w, "Password: ", r.FormValue("password"))
 }
