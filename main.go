@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Rahul4469/lenslocked/controllers"
+	"github.com/Rahul4469/lenslocked/models"
 	"github.com/Rahul4469/lenslocked/templates"
 	"github.com/Rahul4469/lenslocked/views"
 	"github.com/go-chi/chi/v5"
@@ -24,7 +25,21 @@ func main() {
 	}
 	r.Get("/contact", controllers.StaticHandler(tpl))
 
-	userC := controllers.Users{}
+	//Create and save new user through signup
+	//Open new DB connection -> pass a reference to controller User
+	cfg := models.DefaultPostgresconfig()
+	db, err := models.Open(cfg)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	userService := models.UserService{
+		DB: db,
+	}
+
+	userC := controllers.Users{
+		UserService: &userService, //passing a pointer
+	}
 	userC.Templates.New, err = views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml")
 	if err != nil {
 		panic(err)
