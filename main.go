@@ -44,8 +44,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	userC.Templates.SignIn, err = views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml")
+	if err != nil {
+		panic(err)
+	}
 	r.Get("/signup", userC.New)
 	r.Post("/users", userC.Create)
+	r.Get("/signin", userC.SignIn)
 
 	tpl, err = views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml")
 	if err != nil {

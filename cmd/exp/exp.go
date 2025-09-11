@@ -21,18 +21,18 @@ func main() {
 	}
 	fmt.Println("Connected to database")
 
-	// // Create a table
-	// _, err = db.Exec(`
-	// CREATE TABLE IF NOT EXISTS users(
-	// id SERIAL PRIMARY KEY,
-	// email TEXT UNIQUE NOT NULL,
-	// password_hash TEXT NOT NULL
-	// );
-	// `)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println("Tables created.")
+	// Create a table
+	_, err = db.Exec(`
+	CREATE TABLE IF NOT EXISTS users(
+	id SERIAL PRIMARY KEY,
+	email TEXT UNIQUE NOT NULL,
+	password_hash TEXT NOT NULL
+	);
+	`)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Tables created.")
 
 	us := models.UserService{
 		DB: db,
