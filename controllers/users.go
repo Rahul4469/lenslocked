@@ -25,7 +25,7 @@ func (u Users) New(w http.ResponseWriter, r *http.Request) {
 
 	data.Email = r.FormValue("email")
 	// data.CSRFField = csrf.TemplateField(r)
-	u.Templates.New.Execute(w, data) //Note: any data/field/variable thats going through Execute method can be rendered on the html page with {{.__}}
+	u.Templates.New.Execute(w, r, data) //Note: any data/field/variable thats going through Execute method can be rendered on the html page with {{.__}}
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +47,7 @@ func (u Users) SignIn(w http.ResponseWriter, r *http.Request) {
 	//Using email to input pre filled Email field
 	//on the signup form
 	data.Email = r.FormValue("email")
-	u.Templates.SignIn.Execute(w, data)
+	u.Templates.SignIn.Execute(w, r, data)
 }
 
 func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {

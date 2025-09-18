@@ -8,7 +8,7 @@ import (
 // Created to separate parse and Execute steps to router
 func StaticHandler(tpl Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tpl.Execute(w, nil)
+		tpl.Execute(w, r, nil)
 	}
 }
 
@@ -32,6 +32,6 @@ func FAQ(tpl Template) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		tpl.Execute(w, questions)
+		tpl.Execute(w, r, questions)
 	}
 }
