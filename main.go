@@ -37,9 +37,13 @@ func main() {
 	userService := models.UserService{
 		DB: db,
 	}
+	sessionService := models.SessionService{
+		DB: db,
+	}
 
 	userC := controllers.Users{
-		UserService: &userService, //passing a pointer
+		UserService:    &userService, //passing an address
+		SessionService: &sessionService,
 	}
 	userC.Templates.New, err = views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml")
 	if err != nil {

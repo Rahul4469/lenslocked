@@ -24,13 +24,15 @@ func (us *UserService) Create(email, password string) (*User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create user: %w", err)
 	}
-
 	passwordHash := string(hashedBytes)
 
 	user := User{
 		Email:        email,
 		PasswordHash: passwordHash,
 	}
+
+	//Inserting processed Email and Password from
+	//client into DB
 	row := us.DB.QueryRow(`
 		INSERT INTO users (email, password_hash) 
 		VALUES ($1, $2) RETURNING id`, email, passwordHash)
