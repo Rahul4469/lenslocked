@@ -57,6 +57,7 @@ func main() {
 	r.Post("/users", userC.Create)
 	r.Get("/signin", userC.SignIn)
 	r.Post("/signin", userC.ProcessSignIn)
+	r.Post("/signout", userC.ProcessSignOut)
 	r.Get("/users/me", userC.CurrentUser)
 
 	tpl, err = views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml")

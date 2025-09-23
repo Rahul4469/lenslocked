@@ -102,7 +102,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, err := r.Cookie("session")
 	if err != nil {
 		fmt.Fprint(w, "The Email cookie could not be read")
-		http.Redirect(w, r, "signin", http.StatusFound)
+		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
 	//User method defined in Session model
@@ -111,8 +111,24 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	user, err := u.SessionService.User(tokenCookie.Value)
 	if err != nil {
 		fmt.Fprint(w, "The Email cookie could not be read")
-		http.Redirect(w, r, "signin", http.StatusFound)
+		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
 	fmt.Fprintf(w, "Current user: %s\n", user.Email)
+}
+
+func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, err := r.Cookie("session")
+	if err != nil {
+		http.Redirect(w, r, "/signin", http.StatusFound)
+		return
+	}
+	err = u.SessionService.Delete(tokenCookie.Value)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+	}
+	//TODO: Delete the user's cookie
+	deleteCookie(w, tokenCookie.Value)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
