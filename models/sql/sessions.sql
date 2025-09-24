@@ -1,12 +1,8 @@
 CREATE TABLE sessions (
     id SERIAL PRIMARY KEY,
-    user_id INT UNIQUE,
+    user_id INT UNIQUE REFERENCES users (id) ON DELETE CASCADE,
     token_hash TEXT UNIQUE NOT NULL
 );
 
-INSERT INTO sessions (user_id, token_hash)
-VALUES ($1, $2)
-RETURNING id;
 
-DELETE FROM sessions
-WHERE token_hash = $1;
+go install github.com/pressly/goose/v3/cmd/goose@v3

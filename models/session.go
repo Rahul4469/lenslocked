@@ -49,18 +49,19 @@ func (ss *SessionService) Create(userID int) (*Session, error) {
 	//1. Try to update the existing user's session
 	//2. If err, create new session(err= no session_ID for that user_ID)
 	row := ss.DB.QueryRow(`
-	UPDATE sessions
-	SET token_hash = $2
-	WHERE user_id = $1
-	RETURNING id;`, session.UserID, session.TokenHash)
-	err = row.Scan(&session.ID) //IMP: row.Scan populates the data from query into the empty struct/object
-	if err == sql.ErrNoRows {
-		row := ss.DB.QueryRow(`
 		INSERT INTO sessions (user_id, token_hash)
-		VALUES ($1, $2)
-		RETURNING id;`, session.UserID, session.TokenHash)
-		err = row.Scan(&session.ID)
-	}
+		VALUES($1, $2) ON CONFLICT (user_id)
+		DO UPDATE
+		SET token_hash = $2
+		RETURNING id`, session.UserID, session.TokenHash)
+	err = row.Scan(&session.ID) //IMP: row.Scan populates the data from query into the empty struct/object
+	// if err == sql.ErrNoRows {
+	// 	row := ss.DB.QueryRow(`
+	// 		INSERT INTO sessions (user_id, token_hash)
+	// 		VALUES ($1, $2)
+	// 		RETURNING id;`, session.UserID, session.TokenHash)
+	// 	err = row.Scan(&session.ID)
+	// }
 
 	// row := ss.DB.QueryRow(`
 	// 	INSERT INTO sessions (user_id, token_hash)

@@ -29,6 +29,7 @@ func main() {
 	//Create and save new user through signup
 	//Open new DB connection -> pass a reference to User controller
 	cfg := models.DefaultPostgresconfig()
+	fmt.Println(cfg.String())
 	db, err := models.Open(cfg)
 	if err != nil {
 		panic(err)
