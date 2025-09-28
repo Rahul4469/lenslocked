@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Rahul4469/lenslocked/context"
 	"github.com/Rahul4469/lenslocked/models"
 )
 
@@ -99,22 +100,30 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	tokenCookie, err := r.Cookie("session")
-	if err != nil {
-		fmt.Fprint(w, "The Email cookie could not be read")
-		http.Redirect(w, r, "/signin", http.StatusFound)
-		return
-	}
-	//User method defined in Session model
-	//hashes token "value" from request -> checks and compares userId based on that from session table
-	// if the token hash matches -> returns user from that userId
-	user, err := u.SessionService.User(tokenCookie.Value)
-	if err != nil {
-		fmt.Fprint(w, "The Email cookie could not be read")
+	ctx := r.Context()
+	user := context.User(ctx)
+	if user == nil {
 		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
 	fmt.Fprintf(w, "Current user: %s\n", user.Email)
+
+	// tokenCookie, err := r.Cookie("session")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	http.Redirect(w, r, "/signin", http.StatusFound)
+	// 	return
+	// }
+	// //User method defined in Session model
+	// //hashes token "value" from request -> checks and compares userId based on that from session table
+	// // if the token hash matches -> returns user from that userId
+	// user, err = u.SessionService.User(tokenCookie.Value)
+	// if err != nil {
+	// 	fmt.Fprint(w, "The Email cookie could not be read")
+	// 	http.Redirect(w, r, "/signin", http.StatusFound)
+	// 	return
+	// }
+	// fmt.Fprintf(w, "Current user: %s\n", user.Email)
 }
 
 func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
@@ -131,4 +140,32 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	//TODO: Delete the user's cookie
 	deleteCookie(w, tokenCookie.Value)
 	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+type UserMiddleware struct {
+	SessionService *models.SessionService
+}
+
+// next implies that its gonna take the next http.Handler
+// to call when we are done with the middleware
+func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
+	//HandlerFunc implements the http.Handler interface
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenCookie, err := r.Cookie("session")
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		user, err := umw.SessionService.User(tokenCookie.Value)
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ctx := r.Context()
+		ctx = context.WithUser(ctx, user)
+		r = r.WithContext(ctx)
+		next.ServeHTTP(w, r)
+	})
 }

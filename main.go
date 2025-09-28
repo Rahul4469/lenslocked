@@ -26,6 +26,12 @@ func main() {
 	}
 	r.Get("/contact", controllers.StaticHandler(tpl))
 
+	tpl, err = views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml")
+	if err != nil {
+		panic(err)
+	}
+	r.Get("/faq", controllers.FAQ(tpl))
+	//-----------------------------------------
 	//Create and save new user through signup
 	//Open new DB connection -> pass a reference to User controller
 	cfg := models.DefaultPostgresconfig()
@@ -61,15 +67,13 @@ func main() {
 	r.Post("/signout", userC.ProcessSignOut)
 	r.Get("/users/me", userC.CurrentUser)
 
-	tpl, err = views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml")
-	if err != nil {
-		panic(err)
-	}
-	r.Get("/faq", controllers.FAQ(tpl))
-
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Page not found", http.StatusNotFound)
 	})
+
+	umw := controllers.UserMiddleware{
+		SessionService: &sessionService,
+	}
 
 	csrfKey := "Z3xhNej1AqaKKpM4Qx1yGZconAT2NVE0"
 	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false), csrf.Path("/"), csrf.TrustedOrigins([]string{"http://localhost:3000",
@@ -79,7 +83,7 @@ func main() {
 	}))
 
 	fmt.Println("Starting server at port 3000...")
-	http.ListenAndServe(":3000", csrfMw(r))
+	http.ListenAndServe(":3000", csrfMw(umw.SetUser(r)))
 	//once starting the router, all these methods are registered on the router
 	//one receiving any request these methods are matched and the methods in the arguments gets executed for the response
 }
