@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Rahul4469/lenslocked/controllers"
+	"github.com/Rahul4469/lenslocked/migrations"
 	"github.com/Rahul4469/lenslocked/models"
 	"github.com/Rahul4469/lenslocked/templates"
 	"github.com/Rahul4469/lenslocked/views"
@@ -41,6 +42,11 @@ func main() {
 		panic(err)
 	}
 	defer db.Close()
+
+	err = models.MigrateFS(db, migrations.FS, ".")
+	if err != nil {
+		panic(err)
+	}
 	userService := models.UserService{
 		DB: db,
 	}
