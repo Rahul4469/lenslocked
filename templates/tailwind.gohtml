@@ -50,14 +50,15 @@
                        </div>
                    </div>
                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-
+                        {{if currentUser}}    
                         <form action="/signout" method="post" class="inline pr-4">
                             <div class="hidden">{{csrfField}}</div>
                             <button type="submit" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:text-white">Sign out</button>
                         </form>
+                        {{else}}
                        <a href="/signin" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:text-white">Sign in</a>
                        <a href="/signup" class="rounded-md bg-zinc-700 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Sign up</a>
-
+                        {{end}}
                        <!-- Notifications menu -->
                        <!-- <button type="button" class="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
                            <span class="absolute -inset-1.5"></span>

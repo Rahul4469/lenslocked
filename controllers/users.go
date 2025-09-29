@@ -102,10 +102,12 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := context.User(ctx)
-	if user == nil {
-		http.Redirect(w, r, "/signin", http.StatusFound)
-		return
-	}
+	// if user == nil {
+	// 	http.Redirect(w, r, "/signin", http.StatusFound)
+	// 	return
+	// }
+	//We dont need to check if user is nill, because at this point we
+	//already would have checked the RequireUser ctx and have our user
 	fmt.Fprintf(w, "Current user: %s\n", user.Email)
 
 	// tokenCookie, err := r.Cookie("session")
@@ -126,6 +128,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	// fmt.Fprintf(w, "Current user: %s\n", user.Email)
 }
 
+// Delete Session token from DB & Set cookie to "" value
 func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, err := r.Cookie("session")
 	if err != nil {
@@ -137,7 +140,7 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 	}
-	//TODO: Delete the user's cookie
+	// Delete the user's cookie
 	deleteCookie(w, tokenCookie.Value)
 	http.Redirect(w, r, "/", http.StatusFound)
 }
@@ -167,5 +170,18 @@ func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
 		ctx = context.WithUser(ctx, user)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
+	//HandlerFunc implements the http.Handler interface
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := context.User(r.Context())
+		if user == nil {
+			http.Redirect(w, r, "/signin", http.StatusFound)
+			return
+		}
+		next.ServeHTTP(w, r)
+
 	})
 }
