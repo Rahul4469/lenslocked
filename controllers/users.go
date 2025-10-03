@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/Rahul4469/lenslocked/context"
 	"github.com/Rahul4469/lenslocked/models"
@@ -11,11 +12,15 @@ import (
 type Users struct {
 	//Interface injection to implement Execute method
 	Templates struct {
-		New    Template
-		SignIn Template
+		New            Template
+		SignIn         Template
+		ForgotPassword Template
+		CheckYourEmail Template
 	}
-	UserService    *models.UserService
-	SessionService *models.SessionService
+	UserService          *models.UserService
+	SessionService       *models.SessionService
+	PasswordResetService *models.PasswordResetService
+	EmailService         *models.EmailService
 }
 
 // to dispaly signup form
@@ -149,6 +154,41 @@ type UserMiddleware struct {
 	SessionService *models.SessionService
 }
 
+func (u Users) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Email string
+	}
+	data.Email = r.FormValue("email")
+	u.Templates.ForgotPassword.Execute(w, r, data)
+}
+
+func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Email string
+	}
+	data.Email = r.FormValue("email")
+	pwReset, err := u.PasswordResetService.Create(data.Email)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something WEnt wrong.", http.StatusNotFound)
+		return
+	}
+	vals := url.Values{
+		"token": {pwReset.Token},
+	}
+	resetURL := "https://www.lenslocked.com/reset-pw?" + vals.Encode()
+	err = u.EmailService.ForgotPassword(data.Email, resetURL)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something WEnt wrong.", http.StatusNotFound)
+		return
+	}
+	//Dont render the reset token here, we need the user to confirm they have
+	//access to the email account to verify their identity
+	u.Templates.CheckYourEmail.Execute(w, r, data)
+}
+
+// ---------------------------------------------------------------------------
 // next implies that its gonna take the next http.Handler
 // to call when we are done with the middleware
 func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {

@@ -61,6 +61,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	userC.Templates.ForgotPassword, err = views.ParseFS(templates.FS, "forgot-pw.gohtml", "tailwind.gohtml")
+	if err != nil {
+		panic(err)
+	}
 
 	//---------------------------------------------------
 	// Setup Router and Routes ---------------
@@ -91,6 +95,8 @@ func main() {
 	r.Get("/signin", userC.SignIn)
 	r.Post("/signin", userC.ProcessSignIn)
 	r.Post("/signout", userC.ProcessSignOut)
+	r.Get("/forgot-pw", userC.ForgotPassword)
+	r.Post("/forgot-pw", userC.ProcessForgotPassword)
 	// r.Get("/users/me", userC.CurrentUser)
 
 	//The r in the callback is a newly created subrouter, scoped to /user/me
