@@ -11,7 +11,36 @@ import (
 	"github.com/Rahul4469/lenslocked/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/csrf"
+	"github.com/joho/godotenv"
 )
+
+type config struct {
+	PSQL models.PostgresConfig
+	SMTP models.SMTPConfig
+	CSRF struct {
+		Key    string
+		Secure bool
+	}
+	Server struct {
+		Address string
+	}
+}
+
+func loadEnvConfig() (config, error) {
+	var cfg config
+	// Load environment variables from .env file
+	err := godotenv.Load()
+	if err != nil {
+		return cfg, err
+	}
+	//PSQL
+	//SMTP
+	//CSRF
+	//Server : TODO: Read the server values from an ENV variable
+	cfg.Server.Address = ":3000"
+
+	return cfg, nil
+}
 
 func main() {
 	// Setup the Database ---------------
