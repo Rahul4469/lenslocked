@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/Rahul4469/lenslocked/controllers"
 	"github.com/Rahul4469/lenslocked/migrations"
@@ -34,8 +36,20 @@ func loadEnvConfig() (config, error) {
 		return cfg, err
 	}
 	//PSQL
+	cfg.PSQL = models.DefaultPostgresconfig()
 	//SMTP
+	cfg.SMTP.Host = os.Getenv("SMTP_HOST")
+	portStr := os.Getenv("SMTP_PORT")
+	cfg.SMTP.Port, err = strconv.Atoi(portStr)
+	if err != nil {
+		return cfg, err
+	}
+	cfg.SMTP.Username = os.Getenv("SMTP_USERNAME")
+	cfg.SMTP.Password = os.Getenv("SMTP_PASSWORD")
 	//CSRF
+	cfg.CSRF.Key = "Z3xhNej1AqaKKpM4Qx1yGZconAT2NVE0"
+	cfg.CSRF.Secure = false
+
 	//Server : TODO: Read the server values from an ENV variable
 	cfg.Server.Address = ":3000"
 
@@ -43,10 +57,14 @@ func loadEnvConfig() (config, error) {
 }
 
 func main() {
+	cfg, err := loadEnvConfig()
+	if err != nil {
+		panic(err)
+	}
+
 	// Setup the Database ---------------
-	cfg := models.DefaultPostgresconfig()
-	fmt.Println(cfg.String())
-	db, err := models.Open(cfg)
+	fmt.Println(cfg.PSQL.String())
+	db, err := models.Open(cfg.PSQL)
 	if err != nil {
 		panic(err)
 	}
@@ -58,20 +76,26 @@ func main() {
 	}
 
 	// Setup Services ---------------
-	userService := models.UserService{
+	userService := &models.UserService{
 		DB: db,
 	}
-	sessionService := models.SessionService{
+	sessionService := &models.SessionService{
 		DB: db,
+	}
+	pwResetService := &models.PasswordResetService{
+		DB: db,
+	}
+	emailService, err := models.NewEmailService(cfg.SMTP)
+	if err != nil {
+		panic(err)
 	}
 
 	// Setup Middleware ---------------
 	umw := controllers.UserMiddleware{
-		SessionService: &sessionService,
+		SessionService: sessionService,
 	}
 
-	csrfKey := "Z3xhNej1AqaKKpM4Qx1yGZconAT2NVE0"
-	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false), csrf.Path("/"), csrf.TrustedOrigins([]string{"http://localhost:3000",
+	csrfMw := csrf.Protect([]byte(cfg.CSRF.Key), csrf.Secure(cfg.CSRF.Secure), csrf.Path("/"), csrf.TrustedOrigins([]string{"http://localhost:3000",
 		"http://127.0.0.1:3000",
 		"localhost:3000",
 		"127.0.0.1:3000",
@@ -79,8 +103,10 @@ func main() {
 
 	// Setup Contollers ---------------
 	userC := controllers.Users{
-		UserService:    &userService, //passing an address
-		SessionService: &sessionService,
+		UserService:          userService, //passing an address
+		SessionService:       sessionService,
+		PasswordResetService: pwResetService,
+		EmailService:         emailService,
 	}
 	userC.Templates.New, err = views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml")
 	if err != nil {
@@ -91,6 +117,14 @@ func main() {
 		panic(err)
 	}
 	userC.Templates.ForgotPassword, err = views.ParseFS(templates.FS, "forgot-pw.gohtml", "tailwind.gohtml")
+	if err != nil {
+		panic(err)
+	}
+	userC.Templates.CheckYourEmail, err = views.ParseFS(templates.FS, "check-your-email.gohtml", "tailwind.gohtml")
+	if err != nil {
+		panic(err)
+	}
+	userC.Templates.ResetPassword, err = views.ParseFS(templates.FS, "reset-pw.gohtml", "tailwind.gohtml")
 	if err != nil {
 		panic(err)
 	}
@@ -126,6 +160,8 @@ func main() {
 	r.Post("/signout", userC.ProcessSignOut)
 	r.Get("/forgot-pw", userC.ForgotPassword)
 	r.Post("/forgot-pw", userC.ProcessForgotPassword)
+	r.Get("/reset-pw", userC.ResetPassword)
+	r.Post("/reset-pw", userC.ProcessResetPassword)
 	// r.Get("/users/me", userC.CurrentUser)
 
 	//The r in the callback is a newly created subrouter, scoped to /user/me
@@ -143,8 +179,11 @@ func main() {
 	})
 	//-----------------------------------------------------
 	// Start the Server
-	fmt.Println("Starting server at port 3000...")
-	http.ListenAndServe(":3000", r)
+	fmt.Printf("Starting server at port %s.../n", cfg.Server.Address)
+	err = http.ListenAndServe(cfg.Server.Address, r)
+	if err != nil {
+		panic(err)
+	}
 	//once starting the router, all these methods are registered on the router
 	//one receiving any request these methods are matched and the methods in the arguments gets executed for the response
 }
