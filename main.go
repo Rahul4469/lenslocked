@@ -159,7 +159,7 @@ func main() {
 	r.Post("/signin", userC.ProcessSignIn)
 	r.Post("/signout", userC.ProcessSignOut)
 	r.Get("/forgot-pw", userC.ForgotPassword)
-	r.Post("/forgot-pw", userC.ProcessForgotPassword)
+	r.Post("/forgot-pw", userC.ProcessForgotPassword) //On button on forgot password page, Check_your_email template will be Executed and rendered
 	r.Get("/reset-pw", userC.ResetPassword)
 	r.Post("/reset-pw", userC.ProcessResetPassword)
 	// r.Get("/users/me", userC.CurrentUser)
@@ -179,7 +179,7 @@ func main() {
 	})
 	//-----------------------------------------------------
 	// Start the Server
-	fmt.Printf("Starting server at port %s.../n", cfg.Server.Address)
+	fmt.Printf("Starting server at port %s...\n", cfg.Server.Address)
 	err = http.ListenAndServe(cfg.Server.Address, r)
 	if err != nil {
 		panic(err)

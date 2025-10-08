@@ -35,6 +35,8 @@ type EmailService struct {
 	dialer *mail.Client
 }
 
+// Function to Setup Email service
+// Returns EmailService object with Email client and dialer
 func NewEmailService(config SMTPConfig) (*EmailService, error) {
 	client, err := mail.NewClient(config.Host,
 		mail.WithPort(config.Port),

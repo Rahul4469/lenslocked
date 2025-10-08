@@ -2,6 +2,7 @@ package views
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -13,6 +14,10 @@ import (
 	"github.com/Rahul4469/lenslocked/models"
 	"github.com/gorilla/csrf"
 )
+
+type public interface {
+	Public() string
+}
 
 // Parse html template and save into tpl
 func ParseFS(fs fs.FS, patterns ...string) (Template, error) {
@@ -28,7 +33,10 @@ func ParseFS(fs fs.FS, patterns ...string) (Template, error) {
 				return "", fmt.Errorf("CSRFField not implemented")
 			},
 			"currentUser": func() (template.HTML, error) {
-				return "", fmt.Errorf("Current user not implemented")
+				return "", fmt.Errorf("current user not implemented")
+			},
+			"errors": func() []string {
+				return nil
 			},
 		},
 	)
@@ -53,7 +61,7 @@ type Template struct {
 
 // helper func to reuse for templates
 // Execute writes the tpl data as a response to the client
-func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface{}) {
+func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface{}, errs ...error) {
 	tpl, err := t.htmlTpl.Clone() //Clone(): To allow multiple requests without overlapping data
 	if err != nil {
 		log.Printf("Cloning Template: %v", err)
@@ -64,6 +72,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 	//Registers custom functions that can be called
 	//from within your HTML templates
 	//Funcs must be called before ParseFS/Parse
+	errMsgs := errMessages(errs...)
 	tpl.Funcs(
 		template.FuncMap{
 			"csrfField": func() template.HTML {
@@ -71,6 +80,19 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 			},
 			"currentUser": func() *models.User {
 				return context.User(r.Context())
+			},
+			"errors": func() []string {
+				return errMsgs
+				// var errMessages []string
+				// for _, err := range errs {
+				// 	var pubError public
+				// 	if errors.As(err, &pubError) {
+				// 		errMessages = append(errMessages, pubError.Public())
+				// 	} else {
+				// 		errMessages = append(errMessages, "Something went wrong")
+				// 	}
+				// }
+				// return errMessages
 			},
 		},
 	)
@@ -85,4 +107,17 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 		return
 	}
 	io.Copy(w, &buf) //
+}
+
+func errMessages(errs ...error) []string {
+	var errMessages []string
+	for _, err := range errs {
+		var pubError public
+		if errors.As(err, &pubError) {
+			errMessages = append(errMessages, pubError.Public())
+		} else {
+			errMessages = append(errMessages, "Something went wrong")
+		}
+	}
+	return errMessages
 }
