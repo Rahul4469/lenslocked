@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"path"
 
 	"github.com/Rahul4469/lenslocked/context"
 	"github.com/Rahul4469/lenslocked/models"
@@ -21,7 +22,7 @@ type public interface {
 
 // Parse html template and save into tpl
 func ParseFS(fs fs.FS, patterns ...string) (Template, error) {
-	tpl := template.New(patterns[0])
+	tpl := template.New(path.Base(patterns[0]))
 	//Registers custom functions that can be called
 	//from within your HTML templates
 	//Funcs must be called before ParseFS/Parse
@@ -69,10 +70,12 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 			StatusInternalServerError)
 		return
 	}
-	//Registers custom functions that can be called
-	//from within your HTML templates
-	//Funcs must be called before ParseFS/Parse
+
+	//So this error implementation will only work if you wrap your errors
+	//with Public() method wherever you are handling your errors
 	errMsgs := errMessages(errs...)
+	//Registers custom functions that can be called from within your HTML templates
+	//Funcs must be called before ParseFS/Parse
 	tpl.Funcs(
 		template.FuncMap{
 			"csrfField": func() template.HTML {

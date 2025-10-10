@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/Rahul4469/lenslocked/context"
+	"github.com/Rahul4469/lenslocked/errors"
 	"github.com/Rahul4469/lenslocked/models"
 )
 
@@ -45,9 +46,11 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	data.Password = r.FormValue("password")
 	user, err := u.UserService.Create(data.Email, data.Password)
 	if err != nil {
+		if errors.Is(err, models.ErrEmailTaken) {
+			err = errors.Public(err, `That Email address is already associated 
+			with an account.`)
+		}
 		u.Templates.New.Execute(w, r, data, err)
-		// fmt.Println(err)
-		// http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 	//User created with email & password coming from the "Form"

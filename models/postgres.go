@@ -48,11 +48,11 @@ func (cfg *PostgresConfig) String() string {
 func Migrate(db *sql.DB, dir string) error {
 	err := goose.SetDialect("postgres")
 	if err != nil {
-		return fmt.Errorf("migrte: %w", err)
+		return fmt.Errorf("migrate: %w", err)
 	}
 	err = goose.Up(db, dir)
 	if err != nil {
-		return fmt.Errorf("migrte: %w", err)
+		return fmt.Errorf("migrate: %w", err)
 	}
 	return nil
 }
@@ -63,7 +63,7 @@ func MigrateFS(db *sql.DB, migrationFS fs.FS, dir string) error {
 	}
 	goose.SetBaseFS(migrationFS)
 	defer func() {
-		goose.SetBaseFS(nil)
+		goose.SetBaseFS(nil) //reads files from os file system if no embedded system is detected
 	}()
 	return Migrate(db, dir)
 }

@@ -20,8 +20,9 @@ type config struct {
 	PSQL models.PostgresConfig
 	SMTP models.SMTPConfig
 	CSRF struct {
-		Key    string
-		Secure bool
+		Key            string
+		Secure         bool
+		TrustedOrigins []string
 	}
 	Server struct {
 		Address string
@@ -49,6 +50,10 @@ func loadEnvConfig() (config, error) {
 	//CSRF
 	cfg.CSRF.Key = "Z3xhNej1AqaKKpM4Qx1yGZconAT2NVE0"
 	cfg.CSRF.Secure = false
+	cfg.CSRF.TrustedOrigins = []string{"http://localhost:3000",
+		"http://127.0.0.1:3000",
+		"localhost:3000",
+		"127.0.0.1:3000"}
 
 	//Server : TODO: Read the server values from an ENV variable
 	cfg.Server.Address = ":3000"
@@ -89,17 +94,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	galleryService := &models.GalleryService{
+		DB: db,
+	}
 
 	// Setup Middleware ---------------
 	umw := controllers.UserMiddleware{
 		SessionService: sessionService,
 	}
 
-	csrfMw := csrf.Protect([]byte(cfg.CSRF.Key), csrf.Secure(cfg.CSRF.Secure), csrf.Path("/"), csrf.TrustedOrigins([]string{"http://localhost:3000",
-		"http://127.0.0.1:3000",
-		"localhost:3000",
-		"127.0.0.1:3000",
-	}))
+	csrfMw := csrf.Protect([]byte(cfg.CSRF.Key), csrf.Secure(cfg.CSRF.Secure), csrf.Path("/"), csrf.TrustedOrigins(cfg.CSRF.TrustedOrigins))
 
 	// Setup Contollers ---------------
 	userC := controllers.Users{
@@ -125,6 +129,17 @@ func main() {
 		panic(err)
 	}
 	userC.Templates.ResetPassword, err = views.ParseFS(templates.FS, "reset-pw.gohtml", "tailwind.gohtml")
+	if err != nil {
+		panic(err)
+	}
+	galleriesC := controllers.Galleries{
+		GalleryService: galleryService,
+	}
+	galleriesC.Template.New, err = views.ParseFS(templates.FS, "galleries/new.gohtml", "tailwind.gohtml")
+	if err != nil {
+		panic(err)
+	}
+	galleriesC.Template.Edit, err = views.ParseFS(templates.FS, "galleries/edit.gohtml", "tailwind.gohtml")
 	if err != nil {
 		panic(err)
 	}
@@ -164,13 +179,23 @@ func main() {
 	r.Post("/reset-pw", userC.ProcessResetPassword)
 	// r.Get("/users/me", userC.CurrentUser)
 
-	//The r in the callback is a newly created subrouter, scoped to /user/me
+	//The r in the callback is a newly created subrouter, scoped to /users/me
 	//Chi creates a fresh subrouter—a new, independent routing context
 	//All sub routes under this Route() will have the user context data
 	//even "/" request after this Route will spawn with the user ctx data
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)
 		r.Get("/", userC.CurrentUser)
+
+	})
+	r.Route("/galleries", func(r chi.Router) {
+		r.Group(func(r chi.Router) {
+			r.Use(umw.RequireUser)
+			r.Get("/new", galleriesC.New)
+			r.Post("/", galleriesC.Create)
+			r.Get("/{id}/edit", galleriesC.Edit)
+			r.Post("/{id}", galleriesC.Update)
+		})
 
 	})
 
