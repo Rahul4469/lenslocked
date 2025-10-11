@@ -143,6 +143,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	galleriesC.Template.Index, err = views.ParseFS(templates.FS, "galleries/index.gohtml", "tailwind.gohtml")
+	if err != nil {
+		panic(err)
+	}
+	galleriesC.Template.Show, err = views.ParseFS(templates.FS, "galleries/show.gohtml", "tailwind.gohtml")
+	if err != nil {
+		panic(err)
+	}
 
 	//---------------------------------------------------
 	// Setup Router and Routes ---------------
@@ -189,8 +197,10 @@ func main() {
 
 	})
 	r.Route("/galleries", func(r chi.Router) {
+		r.Get("/{id}", galleriesC.Show)
 		r.Group(func(r chi.Router) {
 			r.Use(umw.RequireUser)
+			r.Get("/", galleriesC.Index)
 			r.Get("/new", galleriesC.New)
 			r.Post("/", galleriesC.Create)
 			r.Get("/{id}/edit", galleriesC.Edit)

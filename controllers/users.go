@@ -241,10 +241,16 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 // ---------------------------------------------------------------------------
+// Uses Session
 type UserMiddleware struct {
 	SessionService *models.SessionService
 }
 
+// - look up session data(name, value)
+// - fetch User using the session
+// - set base context to "request"
+// - save User data to that context
+// - pass the context to the request data,
 // next implies that its gonna take the next http.Handler
 // to call when we are done with the middleware
 func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {

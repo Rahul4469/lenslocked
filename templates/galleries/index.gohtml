@@ -1,0 +1,43 @@
+{{template "header" .}}
+<div class="p-8 w-full">
+    <h1 class="pt-4 pb-8 text-3xl font-bold text-zinc-800">
+        My Galleries
+    </h1>
+    <table class="w-full table-fixed">
+        <thead>
+            <tr>
+                <th class="p-2 text-left w-24" >ID</th>
+                <th class="p-2 text-left">Title</th>
+                <th class="p-2 text-left w-96">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Galleries}}
+            <tr class="border">
+                <td class="p-2 border">{{.ID}}</td>
+                <td class="p-2 border">{{.Title}}</td>
+                <td class="p-2 border flex space-x-2">
+                    <a href="/galleries/{{.ID}}" class="justify-center rounded-md bg-indigo-200 px-6 py-1 text-small font-semibold text-indigo-800 
+                        shadow-xs hover:bg-indigo-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">View</a>
+                    <a href="/galleries/{{.ID}}/edit" class="justify-center rounded-md bg-blue-200 px-6 py-1 text-small font-semibold text-blue-800 
+                        shadow-xs hover:bg-blue-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Edit</a>
+                    <form action="/galleries/{{.ID}}/delete" method="post" onsubmit="return confirm('Do you really want to delete this gallery?');">
+                            <div class="hidden">{{csrfField}}</div>
+                            <button type="submit" class="flex justify-center rounded-md bg-red-200 px-8 py-1.5 text-large font-semibold text-red-400 
+                                shadow-xs hover:bg-red-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                                >Delete
+                            </button>
+                    </form>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+    <div class="py-4">
+        <a href="/galleries/new" class="justify-center rounded-md bg-indigo-500 px-8 py-1.5 text-large font-semibold text-white 
+            shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >Create new Gallery
+        </a>
+    </div>
+</div>
+{{template "footer" .}}    
