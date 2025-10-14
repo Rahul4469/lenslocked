@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/Rahul4469/lenslocked/context"
@@ -70,8 +71,9 @@ func (g Galleries) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	type Image struct {
-		GalleryID int
-		Filename  string
+		GalleryID       int
+		Filename        string
+		FilenameEscaped string //Extra field added, more than that from model
 	}
 	var data struct {
 		ID     int
@@ -87,8 +89,9 @@ func (g Galleries) Show(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, image := range images {
 		data.Images = append(data.Images, Image{
-			GalleryID: image.GalleryID,
-			Filename:  image.Filename,
+			GalleryID:       image.GalleryID,
+			Filename:        image.Filename,
+			FilenameEscaped: url.PathEscape(image.Filename),
 		})
 	}
 
@@ -197,26 +200,30 @@ func (g Galleries) Image(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid Gallery ID", http.StatusNotFound)
 		return
 	}
-	images, err := g.GalleryService.Images(galleryID)
+	image, err := g.GalleryService.Image(galleryID, filename)
 	if err != nil {
+		if errors.Is(err, models.ErrNotFound) {
+			http.Error(w, "Image not found", http.StatusNotFound)
+		}
 		fmt.Println(err)
 		http.Error(w, "Something went wrong", http.StatusNotFound)
 		return
 	}
-	var requestedImage models.Image
-	imageFound := false
-	for _, image := range images {
-		if image.Filename == filename {
-			requestedImage = image
-			imageFound = true
-			break
-		}
-	}
-	if !imageFound {
-		http.Error(w, "Image not Found", http.StatusNotFound)
-		return
-	}
-	http.ServeFile(w, r, requestedImage.Path)
+
+	// var requestedImage models.Image
+	// imageFound := false
+	// for _, image := range images {
+	// 	if image.Filename == filename {
+	// 		requestedImage = image
+	// 		imageFound = true
+	// 		break
+	// 	}
+	// }
+	// if !imageFound {
+	// 	http.Error(w, "Image not Found", http.StatusNotFound)
+	// 	return
+	// }
+	http.ServeFile(w, r, image.Path)
 
 }
 

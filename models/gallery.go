@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -23,7 +25,7 @@ type Gallery struct {
 type GalleryService struct {
 	DB *sql.DB
 
-	// Images us used to tell the galleryService where to store and locate
+	// Images is used to tell the galleryService where to store and locate
 	// Images. if not set, the GalleryService will default to using the "images" directory.
 	ImagesDir string
 }
@@ -113,6 +115,10 @@ func (service *GalleryService) Delete(id int) error {
 
 //-----------Images related code
 
+// - Set image/gallery{{id}} directory using requst fields into globPattern
+// - Use Glob to fetch all files in that directory
+// - range over all images and save them to []Images type
+// - return []Images with all images
 func (service *GalleryService) Images(galleryID int) ([]Image, error) {
 	globPattern := filepath.Join(service.galleryDir(galleryID), "*")
 	allFiles, err := filepath.Glob(globPattern)
@@ -130,6 +136,22 @@ func (service *GalleryService) Images(galleryID int) ([]Image, error) {
 		}
 	}
 	return images, nil
+}
+
+func (service *GalleryService) Image(galleryID int, filename string) (Image, error) {
+	imagePath := filepath.Join(service.galleryDir(galleryID), filename)
+	_, err := os.Stat(imagePath)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return Image{}, ErrNotFound
+		}
+		return Image{}, fmt.Errorf("querying for image: %w", err)
+	}
+	return Image{
+		Filename:  filename,
+		GalleryID: galleryID,
+		Path:      imagePath,
+	}, nil
 }
 
 func (service *GalleryService) extensions() []string {
