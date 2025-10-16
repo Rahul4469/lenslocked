@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strconv"
 
 	"github.com/Rahul4469/lenslocked/context"
@@ -101,7 +102,7 @@ func (g Galleries) Show(w http.ResponseWriter, r *http.Request) {
 func (g Galleries) Edit(w http.ResponseWriter, r *http.Request) {
 	//	used helper func to retreive ID from URL & then
 	//	fetch gallery" from DB using that ID
-	//	(then also added a function to fetch user from context into the args of galleryByID)
+	//	(then, also added a function to fetch user from context into the args of galleryByID)
 	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
 	if err != nil {
 		return
@@ -113,9 +114,29 @@ func (g Galleries) Edit(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
+	type Image struct {
+		GalleryID       int
+		Filename        string
+		FilenameEscaped string //Extra field added, more than that from model
+	}
 	var data struct {
-		ID    int
-		Title string
+		ID     int
+		Title  string
+		Images []Image
+	}
+	data.ID = gallery.ID
+	data.Title = gallery.Title
+	images, err := g.GalleryService.Images(gallery.ID)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+	}
+	for _, image := range images {
+		data.Images = append(data.Images, Image{
+			GalleryID:       image.GalleryID,
+			Filename:        image.Filename,
+			FilenameEscaped: url.PathEscape(image.Filename),
+		})
 	}
 	data.ID = gallery.ID
 	data.Title = gallery.Title
@@ -194,7 +215,7 @@ func (g Galleries) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Galleries) Image(w http.ResponseWriter, r *http.Request) {
-	filename := chi.URLParam(r, "filename")
+	filename := g.filename(w, r)
 	galleryID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "Invalid Gallery ID", http.StatusNotFound)
@@ -224,11 +245,33 @@ func (g Galleries) Image(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 	http.ServeFile(w, r, image.Path)
-
+}
+func (g Galleries) DeleteImage(w http.ResponseWriter, r *http.Request) {
+	filename := g.filename(w, r)
+	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
+	if err != nil {
+		return
+	}
+	err = g.GalleryService.DeleteImage(gallery.ID, filename)
+	if err != nil {
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
+	editPath := fmt.Sprintf("/galleries/%d/edit", gallery.ID)
+	http.Redirect(w, r, editPath, http.StatusFound)
 }
 
 //----------------------------------------------------
 // Helper functions
+
+// To make sure the code only uses the base name of the image from path
+// so that longer path cant be injected into our code to access files
+// we dont want to be accessed by unauthorized users
+func (g Galleries) filename(w http.ResponseWriter, r *http.Request) string {
+	filename := chi.URLParam(r, "filename")
+	filename = filepath.Base(filename)
+	return filename
+}
 
 // this is a function type,just like http.HandlerFunc but with an additional parameter
 // for the Gallery model and an error return value.
