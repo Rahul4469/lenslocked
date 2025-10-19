@@ -66,7 +66,7 @@ func (g Galleries) Show(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	//used helper func to retreive ID from URL & then
-	//fetch gallery" from DB using that ID
+	//fetch gallery from DB using that ID
 	gallery, err := g.galleryByID(w, r)
 	if err != nil {
 		return
@@ -246,6 +246,43 @@ func (g Galleries) Image(w http.ResponseWriter, r *http.Request) {
 	// }
 	http.ServeFile(w, r, image.Path)
 }
+
+func (g Galleries) UploadImage(w http.ResponseWriter, r *http.Request) {
+	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
+	if err != nil {
+		return
+	}
+	err = r.ParseMultipartForm(5 << 20) // 5mb: equivalent to (5 * 1024 * 1024)
+	if err != nil {
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
+	fileHeaders := r.MultipartForm.File["images"]
+	for _, fileHeader := range fileHeaders {
+		file, err := fileHeader.Open()
+		if err != nil {
+			http.Error(w, "something went wrong", http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+
+		err = g.GalleryService.CreateImage(gallery.ID, fileHeader.Filename, file)
+		if err != nil {
+			var fileError models.FileError
+			if errors.As(err, &fileError) {
+				msg := fmt.Sprintf(`%v has an invalid content type or extensions, 
+							Only png, gif, anf jpg files can be uploaded.`, fileHeader.Filename)
+				http.Error(w, msg, http.StatusBadRequest)
+			}
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
+		}
+	}
+	editPath := fmt.Sprintf("/galleries/%d/edit", gallery.ID)
+	http.Redirect(w, r, editPath, http.StatusFound)
+
+}
+
 func (g Galleries) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	filename := g.filename(w, r)
 	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
@@ -273,7 +310,7 @@ func (g Galleries) filename(w http.ResponseWriter, r *http.Request) string {
 	return filename
 }
 
-// this is a function type,just like http.HandlerFunc but with an additional parameter
+// This is a function type,just like http.HandlerFunc but with an additional parameter
 // for the Gallery model and an error return value.
 // Methods can be attached to this type which uses extra parameters.
 type galleryOpt func(http.ResponseWriter, *http.Request, *models.Gallery) error

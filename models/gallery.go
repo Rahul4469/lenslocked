@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -110,6 +111,10 @@ func (service *GalleryService) Delete(id int) error {
 	if err != nil {
 		return fmt.Errorf("delete gallery: %w", err)
 	}
+	err = os.RemoveAll(service.galleryDir(id))
+	if err != nil {
+		return fmt.Errorf("delete gallery images: %w", err)
+	}
 	return nil
 }
 
@@ -158,6 +163,10 @@ func (service *GalleryService) extensions() []string {
 	return []string{".png", ".jpg", ".jpeg", ".gif"}
 }
 
+func (service *GalleryService) imageContentTypes() []string {
+	return []string{"image/png", "image/jpeg", "image/gif"}
+}
+
 func (service *GalleryService) galleryDir(id int) string {
 	imagesDir := service.ImagesDir
 	if imagesDir == "" {
@@ -177,6 +186,35 @@ func hasExtension(file string, extensions []string) bool {
 	return false
 }
 
+func (service *GalleryService) CreateImage(galleryID int, filename string, contents io.ReadSeeker) error {
+	err := checkContentType(contents, service.imageContentTypes())
+	if err != nil {
+		return fmt.Errorf("creating image %v: %w", filename, err)
+	}
+	err = checkExtension(filename, service.extensions())
+	if err != nil {
+		return fmt.Errorf("creating image %v: %w", filename, err)
+	}
+
+	// to make sure the gallery directory exists on the system where we want to upload the image
+	galleryDir := service.galleryDir(galleryID)
+	err = os.MkdirAll(galleryDir, 0755)
+	if err != nil {
+		return fmt.Errorf("creating gallery-%d images directory: %w", galleryID, err)
+	}
+	imagePath := filepath.Join(galleryDir, filename)
+	dst, err := os.Create(imagePath)
+	if err != nil {
+		return fmt.Errorf("creating image: %w", err)
+	}
+	defer dst.Close()
+	_, err = io.Copy(dst, contents)
+	if err != nil {
+		return fmt.Errorf("copying contents to image: %w", err)
+	}
+
+	return nil
+}
 func (service *GalleryService) DeleteImage(galleryID int, filename string) error {
 	image, err := service.Image(galleryID, filename)
 	if err != nil {

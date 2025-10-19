@@ -1,6 +1,15 @@
 {{template "header" .}}
-<div class="p-8 w-full">
-    <h1 class="pt-4 pb-8 text-3xl font-bold text-zinc-800">
+<div class="relative pt-20 p-8 w-full h-screen bg-gray-900 bg-opacity-40">
+    <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
+        <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] 
+            -translate-x-1/2 rotate-[30deg] 
+            bg-gradient-to-tr from-[#0891b2] to-[#6366f1] 
+            opacity-25 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+            style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)">
+        </div>
+    </div>
+    <!--  -->
+    <!-- <h1 class="pt-4 pb-8 text-3xl font-bold text-zinc-800">
         My Galleries
     </h1>
     <table class="w-full table-fixed">
@@ -38,6 +47,64 @@
             shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >Create new Gallery
         </a>
+    </div> -->
+    <h1 class="pt-4 pb-8 text-3xl font-bold text-gray-900 dark:text-white">
+        My Galleries
+    </h1>
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {{range .Galleries}}
+        <div
+            class="group relative flex flex-col overflow-hidden rounded-lg border border-gray-500 bg-zinc-700 bg-opacity-30 shadow-sm hover:shadow-lg transition-shadow">
+            <div class="flex-1 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <span
+                        class="inline-block rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800 dark:bg-indigo-200 dark:text-indigo-900">
+                        #{{.ID}}
+                    </span>
+                </div>
+                <h2 class="mb-6 text-lg font-semibold text-gray-800 dark:text-gray-200">{{.Title}}</h2>
+                <div class="mt-auto flex space-x-2">
+                    <a href="/galleries/{{.ID}}"
+                        class="flex-1 inline-flex items-center justify-center gap-1 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        View
+                    </a>
+                    <a href="/galleries/{{.ID}}/edit"
+                        class="flex-1 inline-flex items-center justify-center gap-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" />
+                        </svg>
+                        Edit
+                    </a>
+                    <form action="/galleries/{{.ID}}/delete" method="post"
+                    onsubmit="return confirm('Delete this gallery?')" class="flex-1">
+                    <div class="hidden">{{csrfField}}</div>
+                        <button type="submit"
+                            class="w-full inline-flex items-center justify-center gap-1 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 transition">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {{end}}
     </div>
+
+    <div class="mt-8 text-center">
+        <a href="/galleries/new"
+            class="inline-flex items-center justify-center gap-2 rounded-md bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 4v16m8-8H4" />
+            </svg>
+            Create New Gallery
+        </a>
+    </div>
+
 </div>
-{{template "footer" .}}    
+{{template "footer" .}}
