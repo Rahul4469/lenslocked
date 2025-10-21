@@ -73,18 +73,24 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	// Setup the Database ---------------
-	fmt.Println(cfg.PSQL.String())
-	db, err := models.Open(cfg.PSQL)
+	err = run(cfg)
 	if err != nil {
 		panic(err)
+	}
+}
+
+func run(cfg config) error {
+
+	// Setup the Database ---------------
+	db, err := models.Open(cfg.PSQL)
+	if err != nil {
+		return err
 	}
 	defer db.Close()
 
 	err = models.MigrateFS(db, migrations.FS, ".")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	// Setup Services ---------------
@@ -228,10 +234,12 @@ func main() {
 	//-----------------------------------------------------
 	// Start the Server
 	fmt.Printf("Starting server at port %s...\n", cfg.Server.Address)
-	err = http.ListenAndServe(cfg.Server.Address, r)
-	if err != nil {
-		panic(err)
-	}
-	//once starting the router, all these methods are registered on the router
-	//one receiving any request these methods are matched and the methods in the arguments gets executed for the response
+	// err = http.ListenAndServe(cfg.Server.Address, r)
+	// if err != nil {
+	// 	return err
+	// }
+	// return nil
+
+	return http.ListenAndServe(cfg.Server.Address, r)
+
 }
