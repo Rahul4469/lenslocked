@@ -28,7 +28,7 @@ func DefaultPostgresconfig() PostgresConfig {
 		User:     "baloo",
 		Password: "junglebook",
 		Database: "lenslocked",
-		Sslmode:  "disable",
+		SSLMode:  "disable",
 	}
 }
 
@@ -38,11 +38,11 @@ type PostgresConfig struct {
 	User     string
 	Password string
 	Database string
-	Sslmode  string
+	SSLMode  string
 }
 
 func (cfg *PostgresConfig) String() string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Database, cfg.Sslmode)
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Database, cfg.SSLMode)
 }
 
 func Migrate(db *sql.DB, dir string) error {

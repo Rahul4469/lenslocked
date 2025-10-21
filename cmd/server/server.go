@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/Rahul4469/lenslocked/controllers"
 	"github.com/Rahul4469/lenslocked/migrations"
@@ -36,9 +37,19 @@ func loadEnvConfig() (config, error) {
 	if err != nil {
 		return cfg, err
 	}
-	//PSQL
-	cfg.PSQL = models.DefaultPostgresconfig()
-	//SMTP
+
+	cfg.PSQL = models.PostgresConfig{
+		Host:     os.Getenv("PSQL_HOST"),
+		Port:     os.Getenv("PSQL_PORT"),
+		User:     os.Getenv("PSQL_USER"),
+		Password: os.Getenv("PSQL_PASSWORD"),
+		Database: os.Getenv("PSQL_DATABASE"),
+		SSLMode:  os.Getenv("PSQL_SSLMODE"),
+	}
+	if cfg.PSQL.Host == "" && cfg.PSQL.Port == "" {
+		return cfg, fmt.Errorf("no psql config provided")
+	}
+
 	cfg.SMTP.Host = os.Getenv("SMTP_HOST")
 	portStr := os.Getenv("SMTP_PORT")
 	cfg.SMTP.Port, err = strconv.Atoi(portStr)
@@ -47,16 +58,12 @@ func loadEnvConfig() (config, error) {
 	}
 	cfg.SMTP.Username = os.Getenv("SMTP_USERNAME")
 	cfg.SMTP.Password = os.Getenv("SMTP_PASSWORD")
-	//CSRF
-	cfg.CSRF.Key = "Z3xhNej1AqaKKpM4Qx1yGZconAT2NVE0"
-	cfg.CSRF.Secure = false
-	cfg.CSRF.TrustedOrigins = []string{"http://localhost:3000",
-		"http://127.0.0.1:3000",
-		"localhost:3000",
-		"127.0.0.1:3000"}
 
-	//Server : TODO: Read the server values from an ENV variable
-	cfg.Server.Address = ":3000"
+	cfg.CSRF.Key = os.Getenv("CSRF_KEY")
+	cfg.CSRF.Secure = os.Getenv("CSRF_SECURE") == "true"
+	cfg.CSRF.TrustedOrigins = strings.Fields(os.Getenv("CSRF_TRUSTED_ORIGINS"))
+
+	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
 
 	return cfg, nil
 }
