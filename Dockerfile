@@ -1,10 +1,12 @@
+# Tailwind v4 builder stage
 FROM node:latest AS tailwind-builder
 WORKDIR /tailwind
-COPY ./tailwind/package.json ./tailwind/package-lock.json ./
-RUN npm ci
-COPY ./templates ../templates
-COPY ./tailwind/styles.css ./styles.css
-RUN npm run build
+COPY ./templates /templates
+COPY ./tailwind/tailwind.config.js /src/tailwind.config.js
+COPY ./tailwind/styles.css /src/styles.css
+RUN npm install tailwindcss@3
+RUN npx tailwindcss -c /src/tailwind.config.js -i /src/styles.css -o /styles.css
+
 
 FROM golang AS builder
 WORKDIR /app
