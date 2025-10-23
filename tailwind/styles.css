@@ -1,5 +1,20 @@
-@tailwind base;
-@tailwind components;
+
+@import "tailwindcss";
+
+@source "../templates/**/*.{gohtml,html}";
+
+/* Your custom theme configuration */
+@theme {
+  /* Add custom colors, spacing, etc. here if needed */
+  /* Example:
+  --color-primary: #3b82f6;
+  --spacing-custom: 2.5rem;
+  */
+}
+
+/* Your custom styles here */
+/*@tailwind base;*/
+/*@tailwind components;*/
 @tailwind utilities;
 
 .test {

@@ -1,3 +1,11 @@
+FROM node:latest AS tailwind-builder
+WORKDIR /tailwind
+COPY ./tailwind/package.json ./tailwind/package-lock.json ./
+RUN npm ci
+COPY ./templates ../templates
+COPY ./tailwind/styles.css ./styles.css
+RUN npm run build
+
 FROM golang AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -10,5 +18,6 @@ WORKDIR /app
 COPY ./assets ./assets
 COPY .env .env
 COPY --from=builder /app/server ./server
+COPY --from=tailwind-builder /styles.css /app/assets/styles.css
 CMD ./server
 
