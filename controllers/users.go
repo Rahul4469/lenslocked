@@ -31,7 +31,6 @@ func (u Users) New(w http.ResponseWriter, r *http.Request) {
 		Email string
 		// CSRFField template.HTML ----added csrf managing logic to views.ParseFS
 	}
-
 	data.Email = r.FormValue("email")
 	// data.CSRFField = csrf.TemplateField(r)
 	u.Templates.New.Execute(w, r, data) //Note: any data/field/variable thats going through Execute method can be rendered on the html page with {{.__}}
@@ -98,7 +97,12 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	user, err := u.UserService.Authenticate(data.Email, data.Password)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		// http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		// return
+		if errors.Is(err, models.ErrAccountNotFound) {
+			err = errors.Public(err, "Account not found associated to the provided email.")
+		}
+		u.Templates.New.Execute(w, r, data, err)
 		return
 	}
 	session, err := u.SessionService.Create(user.ID)

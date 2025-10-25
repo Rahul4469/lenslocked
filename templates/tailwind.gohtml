@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/assets/styles.css"/>
+    <link rel="stylesheet" href="/assets/styles.css" />
 </head>
 
 <body>
@@ -15,33 +15,27 @@
                 <div class="relative flex h-16 items-center justify-between">
                     <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
                         <!-- Mobile menu button-->
-                        <button type="button"
-                            class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 
-                        hover:bg-gray-700 hover:text-white focus:ring-2 focus:ring-white focus:outline-hidden focus:ring-inset"
+                        <button type="button" id="mobile-menu-button"
+                            class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
                             aria-controls="mobile-menu" aria-expanded="false">
-                            <span class="absolute -inset-0.5"></span>
                             <span class="sr-only">Open main menu</span>
-                            <!--
-                             Icon when a menu is closed.
 
-                             Menu open: "hidden", Menu closed: "block"
-                           -->
-                            <svg class="block size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true" data-slot="icon">
+                            <!-- Icon when menu is open (hamburger) -->
+                            <svg class="block h-6 w-6" id="menu-open-icon" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                             </svg>
-                            <!--
-                             Icon when a menu is open.
 
-                             Menu open: "block", Menu closed: "hidden"
-                           -->
-                            <svg class="hidden size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true" data-slot="icon">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            <!-- Icon when menu is closed (X) -->
+                            <svg class="hidden h-6 w-6" id="menu-closed-icon" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
+
+                    <!-- Desktop menu -->
                     <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                         <!-- <div class="flex shrink-0 items-center text-4xl pr-8">
                             <a href="/" class="flex items-baseline gap-2 group">
@@ -105,12 +99,14 @@
                     {{else}}
 
                     {{end}}
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                    <div
+                        class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                         {{if currentUser}}
                         <form action="/signout" method="post" class="inline pr-4">
                             <div class="hidden">{{csrfField}}</div>
                             <button type="submit"
-                                class="rounded-md px-4 py-2 text-sm font-medium text-gray-200 hover:text-white">Sign out</button>
+                                class="rounded-md px-4 py-2 text-sm font-medium text-gray-200 hover:text-white">Sign
+                                out</button>
                         </form>
                         {{else}}
                         <a href="/signin"
@@ -130,8 +126,8 @@
                        </button> -->
 
                         <!-- Profile dropdown -->
-                        <div class="relative ml-3">
-                            <!-- <div>
+                        <!-- <div class="relative ml-3"> -->
+                        <!-- <div>
                                <button type="button" class="relative flex rounded-full bg-gray-800 text-sm focus:ring-2 focus:ring-white 
                                focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
                                    <span class="absolute -inset-1.5"></span>
@@ -140,7 +136,7 @@
                                </button>
                            </div> -->
 
-                            <!--
+                        <!--
                              Dropdown menu, show/hide based on menu state.
 
                              Entering: "transition ease-out duration-200"
@@ -150,66 +146,88 @@
                                From: "transform opacity-200 scale-200"
                                To: "transform opacity-0 scale-95"
                            -->
-                            <!-- <div class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5 focus:outline-hidden" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+                        <!-- <div class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5 focus:outline-hidden" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
                                // Active: "bg-gray-200 outline-hidden", Not Active: ""
                                <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-0">Your Profile</a>
                                <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">Settings</a>
                                <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</a>
                            </div> -->
-                        </div>
+                        <!-- </div> -->
                     </div>
                 </div>
             </div>
 
             <!-- Mobile menu, show/hide based on menu state. -->
-            <div class="sm:hidden" id="mobile-menu">
+            <div class="hidden sm:hidden" id="mobile-menu">
                 <div class="space-y-1 px-2 pt-2 pb-3">
-                    <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
                     <a href="/" class="block rounded-md bg-zinc-700 px-3 py-2 text-base font-medium text-white"
                         aria-current="page">Home</a>
                     <a href="/contact"
                         class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Contact</a>
                     <a href="/faq"
-                        class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Faq</a>
-                    <a href="#"
-                        class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Projects</a>
+                        class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">FAQ</a>
                 </div>
             </div>
         </nav>
-    </header>
+        <!-- JavaScript to toggle mobile menu -->
+        <script>
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuClosedIcon = document.getElementById('menu-closed-icon');
+            const menuOpenIcon = document.getElementById('menu-open-icon');
 
-    <!-- ------------------------------------------------------ Alert banner-->
-    {{if errors}}
-    <div class=" bg-red-200">
-        {{range errors}}
-        <div class="flex bg-red-200 py-3 closeable">
-            <div class="shrink-0">
-                <svg class="size-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
-                    data-slot="icon"></svg>
-                <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
-                    clip-rule="evenodd" />
-                </svg>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm font-medium text-red-800">{{.}}</p>
-            </div>
-            <div class="ml-auto pl-3">
-                <div class="-mx-1.5 -my-1.5">
-                    <button type="button" onclick="closeAlert(event)"
-                        class="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-200 focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50 focus:outline-hidden">
-                        <span class="sr-only">Dismiss</span>
-                        <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                            <path
-                                d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                        </svg>
-                    </button>
+            mobileMenuButton.addEventListener('click', () => {
+                // Toggle the menu visibility
+                mobileMenu.classList.toggle('hidden');
+
+                // Toggle the icons
+                menuClosedIcon.classList.toggle('hidden');
+                menuClosedIcon.classList.toggle('block');
+                menuOpenIcon.classList.toggle('hidden');
+                menuOpenIcon.classList.toggle('block');
+
+                // Update aria-expanded for accessibility
+                const isExpanded = mobileMenu.classList.contains('hidden') ? 'false' : 'true';
+                mobileMenuButton.setAttribute('aria-expanded', isExpanded);
+            });
+        </script>
+
+        <!-- ------------------------------------------------------ Alert banner-->
+        {{if errors}}
+        <div class="inline-block rounded-sm bg-red-200/40">
+            {{range errors}}
+            <div class="flex bg-red-200 py-3 closeable">
+                <div class="shrink-0">
+                    <svg class="size-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
+                        data-slot="icon"></svg>
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+                        clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-red-800">{{.}}</p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <div class="-mx-1.5 -my-1.5">
+                        <button type="button" onclick="closeAlert(event)"
+                            class="inline-flex rounded-full bg-red-50 p-1.5 text-red-500 hover:bg-red-200 focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50 focus:outline-hidden">
+                            <span class="sr-only">Dismiss</span>
+                            <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
+                                data-slot="icon">
+                                <path
+                                    d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
+            {{end}}
         </div>
         {{end}}
-    </div>
-    {{end}}
+    </header>
+
+
     <!-- ------------------------------------------------------ -->
     {{end}}
 
