@@ -115,7 +115,7 @@ func run(cfg config) error {
 	umw := controllers.UserMiddleware{
 		SessionService: sessionService,
 	}
-
+	//CSRF middleware
 	csrfMw := csrf.Protect([]byte(cfg.CSRF.Key), csrf.Secure(cfg.CSRF.Secure), csrf.Path("/"), csrf.TrustedOrigins(cfg.CSRF.TrustedOrigins))
 
 	// Setup Contollers ---------------
