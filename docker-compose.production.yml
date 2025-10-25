@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     volumes: 
-      - ./images:/app/images
+      - ~/data/cloud-memory:/app/images
     depends_on:
       - db
 
@@ -18,3 +18,13 @@ services:
       - 443:443
     volumes: 
       - ./Caddyfile:/etc/caddy/Caddyfile
+      - ~/data/lenslocked.com/caddy:/data
+
+  db:
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: ${PSQL_USER}
+      POSTGRES_PASSWORD: ${PSQL_PASSWORD}
+      POSTGRES_DB: ${PSQL_DATABASE}
+    volumes:
+      - ~/data/cloud-memory/psql:/var/lib/postgresql/data/pgdata    
