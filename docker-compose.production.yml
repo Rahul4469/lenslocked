@@ -1,3 +1,13 @@
+x-logging:
+  &highlight-logging
+    driver: fluentd
+    options:
+      # These lines may vary - use what is in your setup.
+      fluentd-address: "otel.highlight.io:24224"
+      fluentd-async: "true"
+      fluentd-sub-second-precision: "true"
+      # This line will need your own project ID
+      tag: "highlight.project_id=2d1y2lqd"
 
 services:
   server: 
@@ -9,6 +19,7 @@ services:
       - ~/data/cloud-memory:/app/images
     depends_on:
       - db
+    logging: *highlight-logging
 
   caddy:
     image: caddy
@@ -19,6 +30,7 @@ services:
     volumes: 
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ~/data/lenslocked.com/caddy:/data
+    logging: *highlight-logging  
 
   db:
     environment:
@@ -28,3 +40,4 @@ services:
       POSTGRES_DB: ${PSQL_DATABASE}
     volumes:
       - ~/data/cloud-memory/psql:/var/lib/postgresql/data/pgdata    
+    logging: *highlight-logging  
