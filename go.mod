@@ -1,4 +1,4 @@
-module github.com/Rahul4469/lenslocked
+module github.com/Rahul4469/cloud-memory
 
 go 1.25.0
 
