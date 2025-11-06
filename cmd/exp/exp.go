@@ -1,52 +1,64 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"io"
+	"log"
+	"os"
+	"strings"
 
-	"github.com/Rahul4469/lenslocked/models"
+	"github.com/joho/godotenv"
+	"golang.org/x/oauth2"
 )
 
 func main() {
-	// // Load environment variables from .env file
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+	dropboxID := os.Getenv("DROPBOX_APP_ID")
+	dropboxSecret := os.Getenv("DROPBOX_APP_SECRET")
+	ctx := context.Background()
+	conf := &oauth2.Config{
+		ClientID:     dropboxID,
+		ClientSecret: dropboxSecret,
+		Scopes:       []string{""},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://www.dropbox.com/oauth2/authorize",
+			TokenURL: "https://api.dropboxapi.com/oauth2/token",
+		},
+	}
 
-	// // Get SMTP configuration from environment variables
-	// host := os.Getenv("SMTP_HOST")
-	// portStr := os.Getenv("SMTP_PORT")
-	// port, err := strconv.Atoi(portStr)
-	// if err != nil {
-	// 	log.Fatalf("Invalid SMTP_PORT: %v", err)
-	// }
-	// username := os.Getenv("SMTP_USERNAME")
-	// password := os.Getenv("SMTP_PASSWORD")
+	// use PKCE to protect against CSRF attacks
+	// https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-22.html#name-countermeasures-6
+	verifier := oauth2.GenerateVerifier()
 
-	// // Validate required environment variables
-	// if host == "" || portStr == "" || username == "" || password == "" {
-	// 	log.Fatal("Missing required SMTP environment variables (SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD)")
-	// }
+	// Redirect user to consent page to ask for permission
+	// for the scopes specified above.
+	url := conf.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.S256ChallengeOption(verifier))
+	fmt.Printf("Visit the URL for the auth dialog: %v\n", url)
+	fmt.Printf("Once you have a code, paste it press enter:")
 
-	// es, err := models.NewEmailService(models.SMTPConfig{
-	// 	Host:     host,
-	// 	Port:     port,
-	// 	Username: username,
-	// 	Password: password,
-	// })
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer es.Close() // Close the client when done
+	// Use the authorization code that is pushed to the redirect
+	// URL. Exchange will do the handshake to retrieve the
+	// initial access token. The HTTP Client returned by
+	// conf.Client will refresh the token as necessary.
+	var code string
+	if _, err := fmt.Scan(&code); err != nil {
+		log.Fatal(err)
+	}
+	tok, err := conf.Exchange(ctx, code, oauth2.VerifierOption(verifier))
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// err = es.ForgotPassword("rahul@gmail.com", "https://lenslocked.com/reset-pw?token=abs123")
-	// if err != nil {
-	// 	log.Fatalf("Failed to send forgot password email: %v", err)
-	// }
-
-	// log.Println("Forgot password email sent successfully!")
-
-	gs := models.GalleryService{}
-	fmt.Println(gs.Images(1))
-
+	client := conf.Client(ctx, tok)
+	resp, err := client.Post("https://api.dropboxapi.com/2/sharing/list_folders",
+		"application/json", strings.NewReader(`{"path": ""}`))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	io.Copy(os.Stdout, resp.Body)
 }
