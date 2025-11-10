@@ -2,11 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
@@ -36,7 +35,10 @@ func main() {
 
 	// Redirect user to consent page to ask for permission
 	// for the scopes specified above.
-	url := conf.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.S256ChallengeOption(verifier))
+	url := conf.AuthCodeURL(
+		"state",
+		oauth2.SetAuthURLParam("token_access_type", "offline"),
+		oauth2.S256ChallengeOption(verifier))
 	fmt.Printf("Visit the URL for the auth dialog: %v\n", url)
 	fmt.Printf("Once you have a code, paste it press enter:")
 
@@ -52,13 +54,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	enc := json.NewEncoder((os.Stdout))
+	enc.SetIndent("", "  ")
+	enc.Encode(tok)
 
-	client := conf.Client(ctx, tok)
-	resp, err := client.Post("https://api.dropboxapi.com/2/sharing/list_folders",
-		"application/json", strings.NewReader(`{"path": ""}`))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-	io.Copy(os.Stdout, resp.Body)
+	// client := conf.Client(ctx, tok)
+	// resp, err := client.Post("https://api.dropboxapi.com/2/sharing/list_folders",
+	// 	"application/json", strings.NewReader(`{"path": ""}`))
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer resp.Body.Close()
+	// io.Copy(os.Stdout, resp.Body)
 }

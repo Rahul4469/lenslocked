@@ -3,7 +3,7 @@ package context
 import (
 	"context"
 
-	"github.com/Rahul4469/lenslocked/models"
+	"github.com/Rahul4469/cloud-memory/models"
 )
 
 type key string

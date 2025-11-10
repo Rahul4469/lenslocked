@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Rahul4469/lenslocked/rand"
+	"github.com/Rahul4469/cloud-memory/rand"
 )
 
 const (

@@ -120,7 +120,7 @@ func (service *GalleryService) Delete(id int) error {
 
 //-----------Images related code
 
-// - Set image/gallery{{id}} directory using requst fields into globPattern
+// - Set image/gallery{{id}} directory using request fields into globPattern
 // - Use Glob to fetch all files in that directory
 // - range over all images and save them to []Images type
 // - return []Images with all images

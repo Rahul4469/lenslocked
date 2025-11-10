@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Rahul4469/lenslocked/context"
-	"github.com/Rahul4469/lenslocked/errors"
-	"github.com/Rahul4469/lenslocked/models"
+	"github.com/Rahul4469/cloud-memory/context"
+	"github.com/Rahul4469/cloud-memory/errors"
+	"github.com/Rahul4469/cloud-memory/models"
 )
 
 type Users struct {
@@ -102,7 +102,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, models.ErrAccountNotFound) {
 			err = errors.Public(err, "Account not found associated to the provided email.")
 		}
-		u.Templates.New.Execute(w, r, data, err)
+		u.Templates.SignIn.Execute(w, r, data, err)
 		return
 	}
 	session, err := u.SessionService.Create(user.ID)

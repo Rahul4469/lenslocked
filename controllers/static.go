@@ -23,7 +23,7 @@ func FAQ(tpl Template) http.HandlerFunc {
 		},
 		{
 			Question: "What are your support hourse?",
-			Answer:   "We have a supoort team available 24/7 over email, response may take longer on weekends",
+			Answer:   "We have a support team available 24/7 over email, response may take longer on weekends",
 		},
 		{
 			Question: "How do I contact support?",

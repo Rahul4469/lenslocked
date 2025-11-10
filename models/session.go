@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/Rahul4469/lenslocked/rand"
+	"github.com/Rahul4469/cloud-memory/rand"
 )
 
 // minimum number of bytes to be used for each session token

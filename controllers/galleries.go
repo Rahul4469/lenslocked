@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/Rahul4469/lenslocked/context"
-	"github.com/Rahul4469/lenslocked/errors"
-	"github.com/Rahul4469/lenslocked/models"
+	"github.com/Rahul4469/cloud-memory/context"
+	"github.com/Rahul4469/cloud-memory/errors"
+	"github.com/Rahul4469/cloud-memory/models"
 	"github.com/go-chi/chi/v5"
 )
 

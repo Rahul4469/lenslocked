@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/Rahul4469/lenslocked/context"
-	"github.com/Rahul4469/lenslocked/models"
+	"github.com/Rahul4469/cloud-memory/context"
+	"github.com/Rahul4469/cloud-memory/models"
 	"github.com/gorilla/csrf"
 )
 
@@ -23,9 +23,7 @@ type public interface {
 // Parse html template and save into tpl
 func ParseFS(fs fs.FS, patterns ...string) (Template, error) {
 	tpl := template.New(path.Base(patterns[0]))
-	//Registers custom functions that can be called
-	//from within your HTML templates
-	//Funcs must be called before ParseFS/Parse
+	// Injecting custom functions into the html templates
 	tpl.Funcs(
 		template.FuncMap{
 			//We Implement this Func down in execute becuse we needs request specific info
