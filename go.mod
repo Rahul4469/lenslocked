@@ -3,7 +3,6 @@ module github.com/Rahul4469/cloud-memory
 go 1.25.0
 
 require (
-	github.com/Rahul4469/lenslocked v0.0.0-20251030075305-42c94e95695e
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/gorilla/csrf v1.7.3
 	github.com/jackc/pgconn v1.14.3

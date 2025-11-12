@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -70,10 +72,37 @@ func (oa OAuth) Callback(w http.ResponseWriter, r *http.Request) {
 	// Persist the user's oauth token so we can use  it in the future
 	// Then redirect them to wahtever page they were on before starting the
 	// OAuth process.
+
+	// w.Header().Set("Content-Type", "application/json")
+	// enc := json.NewEncoder(w)
+	// enc.SetIndent("", "  ")
+	// enc.Encode(token)
+
+	client := config.Client(r.Context(), token)
+	resp, err := client.Post(
+		"https://api.dropboxapi.com/2/files/list_folder",
+		"application/json",
+		strings.NewReader(`{"path": ""}`),
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	unpretty, err := io.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var pretty bytes.Buffer
+	err = json.Indent(&pretty, unpretty, "", "  ")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-	enc.Encode(token)
+	pretty.WriteTo(w)
 }
 
 func redirectURI(r *http.Request, provider string) string {
