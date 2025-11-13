@@ -419,7 +419,8 @@
                     for(let i = 0;i < files.length; i++) {
                         let input = document.createElement("input");
                         input.type = "hidden";
-                        input.value = files[0].link;
+                        input.name = "files";
+                        input.value = files[i].link; // Fixed bug, was downloading multiple images with same url
                         dbxForm.appendChild(input);
                     }
                     dbxForm.submit();

@@ -11,6 +11,7 @@ import (
 	"github.com/Rahul4469/cloud-memory/errors"
 	"github.com/Rahul4469/cloud-memory/models"
 	"github.com/go-chi/chi/v5"
+	"golang.org/x/sync/errgroup"
 )
 
 type Galleries struct {
@@ -280,7 +281,35 @@ func (g Galleries) UploadImage(w http.ResponseWriter, r *http.Request) {
 	}
 	editPath := fmt.Sprintf("/galleries/%d/edit", gallery.ID)
 	http.Redirect(w, r, editPath, http.StatusFound)
+}
 
+func (g Galleries) ImagesViaURL(w http.ResponseWriter, r *http.Request) {
+	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
+	if err != nil {
+		return
+	}
+	err = r.ParseForm()
+	if err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+	files := r.PostForm["files"]
+
+	var eg errgroup.Group
+	for _, file := range files {
+		imageFile := file // Bug solved where multiple images overrites to 1 one image and only one image is saved on the page
+		eg.Go(func() error {
+			return g.GalleryService.CreateImageViaURL(gallery.ID, imageFile)
+		})
+	}
+	err = eg.Wait()
+	if err != nil {
+		http.Error(w, "Unable to download all images", http.StatusInternalServerError)
+		return
+	}
+
+	editPath := fmt.Sprintf("/galleries/%d/edit", gallery.ID)
+	http.Redirect(w, r, editPath, http.StatusFound)
 }
 
 func (g Galleries) DeleteImage(w http.ResponseWriter, r *http.Request) {
